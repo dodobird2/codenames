@@ -25,35 +25,27 @@ class CodenamesGame {
             return this.players.includes(player);
         }
 
-    addPlayer(player, role) {
-            console.log(`Adding player: ${player}`);
-            if (this.players.includes(player)) {
-                console.log(`Player already in the game: ${player}`);
-                
+        addPlayer(user) {
+            console.log("Adding player: " + user);
+            if (!this.redTeam.includes(user) && !this.blueTeam.includes(user)) {
+                // Check which team has fewer players and add the new player to that team
+                if (this.redTeam.length <= this.blueTeam.length) {
+                    this.redTeam.push(user);
+                    console.log(`${user} added to red team`);
+                } else {
+                    this.blueTeam.push(user);
+                    console.log(`${user} added to blue team`);
+                }
+        
+                // If the user is a bot, initiate its turn after adding it
+                if (this.isBotUser(user)) {
+                    this.initiateTurn();
+                }
+            } else {
+                console.log(`Player already in the game: ${user}`);
+            }
         }
-
-            // Determine which team the player should be on
-            let team = 'red';
-            if (this.teams.red.operators.length > this.teams.blue.operators.length) {
-            team = 'blue';
-        }
-
-        // Check if the selected team already has a spymaster
-        if (role === 'spymaster' && this.teams[team].spymaster) {
-            role = 'operator'; // If yes, change the role to operator
-        }
-
-        // Assign the player to the selected role and team
-        if (role === 'spymaster') {
-            this.teams[team].spymaster = player;
-        } else {
-            this.teams[team].operators.push(player);
-        } 
-
-        // Add the player to the list of players
-        this.players.push(player);
-
-    }
+        
     getTeamOfPlayer(player) {
         // Go through both teams and return the team of the player
         for (const team of ['red', 'blue']) {
@@ -244,35 +236,36 @@ class CodenamesGame {
                     this.endTurn();
                     this.teams[tile.team].score++;
                     console.log(this.board)
-                    return `You guessed a word belonging to the other team! Your turn is over.`;
-                }            
+                    
+                    if (this.isBotTurn()) {
+                        this.initiateTurn();  // Add this line to start the bot's turn after the current guess
+                    }
+    
+                        return `You guessed a word belonging to the other team! Your turn is over.`;
+                    }             
             
         } 
         
-    initiateTurn() {
+        initiateTurn() {
             console.log("Initiating turn...");
             let team = this.turn; // Get the current team
             console.log(`Team: ${team}`);  // Debug line
-
+        
             let player = this.getTeamOfPlayer(team)[0]; // Get the first player of this team
             console.log(`Player: ${player}`);  // Debug line
-
-            
-
-            // Only ask to guess if it's not a bot's turn
+        
             if (!this.isBotTurn()) {
                 let guess = player.guess(); // Ask the player to guess a word
                 this.guessWord(player, guess); // Process the guessed word
-            }
-        
-            // If it's a bot's turn, delay the bot's guess
-            if (this.isBotTurn()) {
+            } else {
                 setTimeout(() => {
                     let guess = player.guess(); // Ask the bot to guess a word
                     this.guessWord(player, guess); // Process the guessed word
+                    this.initiateTurn();  // Add this line to continue the game after the bot makes a guess
                 }, 2000); // Wait for 2 seconds before the bot makes a guess
             }
         }
+        
     
     isBotTurn() {
             // Get the current team
