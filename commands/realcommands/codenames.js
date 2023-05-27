@@ -45,6 +45,11 @@ class CodenamesGame {
                 console.log(`Player already in the game: ${user}`);
             }
         }
+
+    isBotUser(user) {
+            return user.bot === true;
+        }
+        
         
     getTeamOfPlayer(player) {
         // Go through both teams and return the team of the player
